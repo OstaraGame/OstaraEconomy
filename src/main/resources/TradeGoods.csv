@@ -1,0 +1,5 @@
+Name,Type,Cost,Volume
+Water,ALCHEMY,10,1
+Fabric,TEXTILES,15,20
+Glass,WIDGETS,1,1
+Parts,SPECIAL,300,.1

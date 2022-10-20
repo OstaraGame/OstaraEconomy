@@ -1,0 +1,5 @@
+LocationName,TradeGoodName,Inventory,InventoryMax,RestockRateBase,RestockRate
+Old Town,Water,200000,500000,100000,100000
+Bluewater,Glass,0,1000,200,200
+Albuquerque,Fabric,20,1000,10,5
+Scrapyard,Parts,2500,1000000,.01,.01

@@ -1,0 +1,9 @@
+Name,Connections,Size
+Old Town,"Scrapyard,Lucky Bend,Badlands",level2
+Scrapyard,"Old Town",level1
+Lucky Bend,"Badlands,Bluewater",level1
+Badlands,"Old Town,Lucky Bend,Albuquerque,Black Rock Canyon Town",level1
+Bluewater,"Lucky Bend",level2
+Black Rock Canyon Town,"Badlands,South Albuquerque Farms",level2
+Albuquerque,"South Albuquerque Farms,Badlands",level3
+South Albuquerque Farms,"Black Rock Canyon Town,Albuquerque",level1

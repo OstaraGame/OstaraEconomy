@@ -1,0 +1,9 @@
+LocationName,TradeGoodName,UnitsDemanded,DemandRate,CeilingPrice
+Albuquerque,Water,500,100,30
+Albuquerque,Glass,300,100,5
+Old Town,Fabric,15,.5,50
+Old Town,Glass,15,.5,50
+Bluewater,Fabric,45,5,60
+Scrapyard,Glass,50,50,5
+South Albuquerque Farms,Water,10000,1000,13
+Black Rock Canyon Town,Parts,5,.2,1000
