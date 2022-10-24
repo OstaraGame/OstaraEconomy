@@ -4,9 +4,9 @@ import com.ostaragame.systems.economy.WorldTradeMap
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 
 object EconomyEngine : ServerTick {
-    val idleTraders:MutableList<NonPlayerTrader> = mutableListOf()
-    val tradersLookingForJobs:MutableList<NonPlayerTrader> = mutableListOf()
-    val workingTraders:MutableList<NonPlayerTrader> = mutableListOf()
+    private val idleTraders:MutableList<NonPlayerTrader> = mutableListOf()
+    private val tradersLookingForJobs:MutableList<NonPlayerTrader> = mutableListOf()
+    private val workingTraders:MutableList<NonPlayerTrader> = mutableListOf()
 
     fun registerTrader(trader: NonPlayerTrader) {
         //TODO Make sure a trader is only added once
@@ -15,7 +15,9 @@ object EconomyEngine : ServerTick {
 
 
     fun prepareIdleWorkers() {
-        for (trader in idleTraders) {
+        while (idleTraders.isNotEmpty()) {
+            val trader = idleTraders.removeFirst()
+            trader.readyForWork()
             traderLookingForWork(trader)
         }
     }
@@ -26,7 +28,7 @@ object EconomyEngine : ServerTick {
         }
     }
 
-    fun assignTradeJobs() {
+    private fun assignTradeJobs() {
 
         while (tradersLookingForJobs.isNotEmpty()) {
             val trader = tradersLookingForJobs.removeFirst()
@@ -37,9 +39,11 @@ object EconomyEngine : ServerTick {
             val result = searchForSupplyAndDemand(currentLocation,tradeGood!!)
             if (result.first == "Success") {
                 println("Found work for ${trader.name}, ${result.second}")
-                trader.foundWork(result.second!!, mutableListOf())
-                //Here is your route TODO
-                //Maybe Cache Routes Here!
+                //Here is your route
+                val tradeMission = result.second!!
+                trader.foundWork(tradeMission, WorldTradeMap.findRouteForTradeMission(currentLocation, tradeMission, trader.traits))
+
+                //Maybe Cache Routes Here?
                 workingTraders.add(trader)
             } else {
                 println("No work found for ${trader.name}")
@@ -50,22 +54,25 @@ object EconomyEngine : ServerTick {
 
     }
 
-    fun doWork() {
+    private fun doWork() {
         for (trader in workingTraders) {
-            trader.doWork()
+            if (trader.seekingWork())
+                traderLookingForWork(trader)
+            else
+                trader.doWork()
         }
     }
 
 
     override fun doTick() {
-        prepareIdleWorkers()
+        //prepareIdleWorkers()
         assignTradeJobs()
         doWork()
     }
 
 
-
-    fun searchForSupplyAndDemand(startingFrom:Location, tradeGood: TradeGood): Pair<String, TradeMission?> {
+    //TODO This in combination with findRoute is inefficient because we are searching for the supply location twice and should have the initial route from that
+    private fun searchForSupplyAndDemand(startingFrom:Location, tradeGood: TradeGood): Pair<String, TradeMission?> {
         val queue:MutableList<Location> = mutableListOf()
         val visitedMap:MutableMap<String,Location> = mutableMapOf()
         queue.add(startingFrom)

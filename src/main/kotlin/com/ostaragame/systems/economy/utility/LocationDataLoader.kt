@@ -47,7 +47,7 @@ class LocationDataLoader {
             //println("Loading $name")
             val node: Node = graph.addNode(nearLocationName)
             node.setAttribute("ui.label", nearLocationName)
-            //node.setAttribute("ui.class", record.get(LocationHeaders.Size) )
+            node.setAttribute("ui.class", record.get(LocationHeaders.Size) )
             val lineParser:CSVParser = CSVParser.parse(record.get(LocationHeaders.Connections), CSVFormat.DEFAULT)
             for (lineRecord:CSVRecord in lineParser.records) {
                 for (distantLocationName:String in lineRecord.toList()) {
@@ -59,7 +59,7 @@ class LocationDataLoader {
                         distantLocation = Location(distantLocationName, WorldTradeMap.getNextLocationId(), mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf())
                         worldTradeMap.locations[distantLocationName] = distantLocation
                     }
-                    val connection = Connection(nearLocation, distantLocation,-1.0f,Infrastructure.NONE, Terrain.PLAINS,Weather.CLEAR, mutableListOf())
+                    val connection = Connection(nearLocation, distantLocation,1.0f,Infrastructure.NONE, Terrain.PLAINS,Weather.CLEAR, mutableListOf())
                     nearLocation.connections.add(connection)
                     //TODO Reciprocal connections in distantLocation
                 }

@@ -8,28 +8,21 @@ import com.ostaragame.systems.economy.engine.TradeLibrary
 import com.ostaragame.systems.economy.ui.GraphMouseEventManager
 import com.ostaragame.systems.economy.utility.LocationDataLoader
 import org.graphstream.ui.spriteManager.Sprite
-import org.graphstream.ui.spriteManager.SpriteManager
 import org.graphstream.ui.view.Viewer
-
+import java.lang.Thread.sleep
 
 
 fun main(args: Array<String>) {
     println("Hello Ostara!")
 
     println("Program arguments: ${args.joinToString()}")
-    System.setProperty("org.graphstream.ui", "swing");
+    System.setProperty("org.graphstream.ui", "swing")
 
 
-    val tradeViewer: TradeViewer = TradeViewer()
-    val graph = tradeViewer.loadedGraph()
-    val spriteManager:SpriteManager = SpriteManager(graph)
-
-
-
-    val dataLoader: LocationDataLoader = LocationDataLoader()
+    val dataLoader = LocationDataLoader()
 
     SceneTree.worldTradeMap = WorldTradeMap
-    dataLoader.loadLocationListIntoGraph(graph, SceneTree.worldTradeMap)
+    dataLoader.loadLocationListIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
 
     /* <TRADERS> */
     val aTrader = NonPlayerTrader("Yukon Gold!", Traits())
@@ -54,32 +47,33 @@ fun main(args: Array<String>) {
     dataLoader.loadTradeGoodSupply(SceneTree.tradeLibrary, SceneTree.worldTradeMap)
    // println(SceneTree.worldTradeMap.locations["Albuquerque"]?.supply?.first())
 
-    tradeViewer.updateSupplyAndDemandOnGraph(graph, SceneTree.worldTradeMap, spriteManager)
-    val viewer:Viewer = graph.display()
+    TradeViewer.updateSupplyAndDemandOnGraph()
+//    val viewer:Viewer = TradeViewer.graph.display()
 
 
 
-    viewer.defaultView.enableMouseOptions()
+//    viewer.defaultView.enableMouseOptions()
 
     //viewer.getDefaultView().setMouseManager(MouseOverMouseManager(EnumSet.of(InteractiveElement.EDGE, InteractiveElement.NODE, InteractiveElement.SPRITE)));
-    val fromViewer = viewer.newViewerPipe()
-    fromViewer.addViewerListener(GraphMouseEventManager())
-    fromViewer.addSink(graph)
+//    val fromViewer = viewer.newViewerPipe()
+//    fromViewer.addViewerListener(GraphMouseEventManager())
+//    fromViewer.addSink(TradeViewer.graph)
 
 
     //TODO Pull the starting position from the travelers list for the locations
-    val raiderSprite:Sprite = spriteManager.addSprite("Raider1")
+    val raiderSprite:Sprite = TradeViewer.spriteManager.addSprite("Raider1")
     raiderSprite.attachToNode("Badlands")
 
-    val yukonSprite:Sprite = spriteManager.addSprite("Yukon Gold!")
+    val yukonSprite:Sprite = TradeViewer.spriteManager.addSprite("Yukon Gold!")
     yukonSprite.attachToNode("Lucky Bend")
     yukonSprite.setAttribute("ui.class", "trader")
 
-    EconomyEngine.doTick()
+//    EconomyEngine.doTick()
 //    MissionEngine.doTick()
 //        var traderPos:Double = 0.0
 //        var raiderPos:Double = -15.0
-//        while (true) {
+    EconomyEngine.prepareIdleWorkers()
+        while (true) {
 //            fromViewer.pump()
 //            raiderPos += 1.5
 //            traderPos += 1
@@ -95,9 +89,9 @@ fun main(args: Array<String>) {
 //            }
 //            yukonSprite.setPosition(traderPos/100.0)
 //            raiderSprite.setPosition(raiderPos/100.0)
-//            sleep(100)
-//
-//        }
+            sleep(1000)
+            EconomyEngine.doTick()
+        }
 
 /*
 3 types of goods - shapes
