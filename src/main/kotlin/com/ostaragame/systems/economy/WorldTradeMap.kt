@@ -3,6 +3,7 @@ package com.ostaragame.systems.economy
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 import com.ostaragame.systems.economy.actors.Traits
 import com.ostaragame.systems.economy.engine.*
+import java.util.PriorityQueue
 
 /* All the locations and their connections and demands */
 object WorldTradeMap {
@@ -51,37 +52,35 @@ object WorldTradeMap {
     ) : ArrayDeque<RouteLeg> {
 
         //Dijkstra
-        val dist:  MutableMap<Location,Float> = mutableMapOf()
+        val distance:  MutableMap<Location,Float> = mutableMapOf()
         val prev:  MutableMap<Location,Location> = mutableMapOf()
-        val queue: MutableList<Location> = mutableListOf()
 
-        for( vertex in locations.values ) {
-            dist[vertex] = Float.MAX_VALUE
-            queue.add(vertex)
+        val compareByDistance: Comparator<Location> = compareBy { distance[it] }
+
+        val queue: PriorityQueue<Location> = PriorityQueue(locations.size, compareByDistance)
+
+        for( location in locations.values ) {
+            distance[location] = Float.MAX_VALUE
         }
-        dist[startingLocation] = 0.0F
 
-        var nextNearestLocationU = startingLocation
+        distance[startingLocation] = 0.0F
+        queue.add(startingLocation)
+
+        var nextNearestLocationU: Location
         while (queue.isNotEmpty()) {
-            //TODO Replace queue with a min-priority queue sorted by dist to remove the following inefficient search
-            var smallestValue = Int.MAX_VALUE
-            for ( location in queue ) {
-                val distanceValueForLocation = dist[location]!!
-                if (distanceValueForLocation < smallestValue) {
-                    nextNearestLocationU = location
-                }
-            }
+
+            nextNearestLocationU = queue.remove()
             if ( nextNearestLocationU == destinationLocation ) {
                 break
             }
-            queue.remove(nextNearestLocationU)
 
             for ( neighborV in nextNearestLocationU.neighbors()) {
-                if ( queue.contains(neighborV) ) {
-                    val altDistance = dist[nextNearestLocationU]!! + nextNearestLocationU.connectionDistance(neighborV)
-                    if (altDistance < dist[neighborV]!!) {
-                        dist[neighborV] = altDistance
+                if ( queue.contains(neighborV) || distance[neighborV] == Float.MAX_VALUE) {
+                    val altDistance = distance[nextNearestLocationU]!! + nextNearestLocationU.connectionDistance(neighborV)
+                    if (altDistance < distance[neighborV]!!) {
+                        distance[neighborV] = altDistance
                         prev[neighborV] = nextNearestLocationU
+                        queue.add(neighborV)
                     }
                 }
             }
@@ -96,17 +95,7 @@ object WorldTradeMap {
             }
         }
 
-//        if (location == destinationLocation) {
-//            //TODO Some sort of self connection or other way of not needing a connection for a route that is to the same location?
-//            route.add(
-//                RouteLeg(
-//                    Connection(
-//                        location, location, 0.0F, Infrastructure.NONE, Terrain.PLAINS, Weather.CLEAR,
-//                        mutableListOf()
-//                    ), location, traderActivity
-//                )
-//            )
-//        } else {
+            //TODO Some sort of self connection or other way of not needing a connection for a route that is to the same location?
             for ((index, location) in shortestPath.withIndex()) {
                 if (index + 1 <= shortestPath.size - 1) {
                     val nextLocation = shortestPath[index + 1]

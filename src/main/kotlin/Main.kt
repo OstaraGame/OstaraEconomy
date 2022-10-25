@@ -25,10 +25,16 @@ fun main(args: Array<String>) {
     dataLoader.loadLocationListIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
 
     /* <TRADERS> */
+
     val aTrader = NonPlayerTrader("Yukon Gold!", Traits())
     aTrader.currentLocation = SceneTree.worldTradeMap.locations["Lucky Bend"]!!
     SceneTree.worldTradeMap.locations["Lucky Bend"]!!.travelers.add(aTrader)
     EconomyEngine.registerTrader(aTrader)
+
+    val bTrader = NonPlayerTrader("Derr_Mann", Traits())
+    bTrader.currentLocation = SceneTree.worldTradeMap.locations["Bluewater"]!!
+    SceneTree.worldTradeMap.locations["Bluewater"]!!.travelers.add(bTrader)
+    EconomyEngine.registerTrader(bTrader)
 
     /* </TRADERS> */
 

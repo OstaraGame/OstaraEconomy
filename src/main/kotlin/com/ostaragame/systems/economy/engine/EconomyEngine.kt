@@ -28,14 +28,22 @@ object EconomyEngine : ServerTick {
         }
     }
 
+    //TODO To round-robin distribute trade goods, probably not the way
+    var pointer = 0
     private fun assignTradeJobs() {
+
+        val tradeGoodsInWorld = TradeLibrary.tradeGoods.values
 
         while (tradersLookingForJobs.isNotEmpty()) {
             val trader = tradersLookingForJobs.removeFirst()
             val currentLocation = trader.currentLocation
 
             //TODO: Use traits, list of demands, value, and distances
-            val tradeGood = TradeLibrary.tradeGoods["Parts"]
+            val tradeGood = tradeGoodsInWorld.elementAt(pointer)
+            pointer++
+            if (pointer >= tradeGoodsInWorld.size) {
+                pointer = 0
+            }
             val result = searchForSupplyAndDemand(currentLocation,tradeGood!!)
             if (result.first == "Success") {
                 println("Found work for ${trader.name}, ${result.second}")
@@ -47,8 +55,9 @@ object EconomyEngine : ServerTick {
                 workingTraders.add(trader)
             } else {
                 println("No work found for ${trader.name}")
-                trader.goIdle()
-                idleTraders.add(trader)
+                //TODO does the trader go idle if no work is found, or do they keep looking for work, and for how long? Trait controlled?
+                //trader.goIdle()
+                //idleTraders.add(trader)
             }
         }
 
@@ -63,9 +72,22 @@ object EconomyEngine : ServerTick {
         }
     }
 
+    private fun doRestock() {
+        //TODO handle demand increasing unchecked, or overflowing past Float.MAX_VALUE
+        for (location in WorldTradeMap.locations.values) {
+            for (supply in location.supply) {
+                supply.inventoryCurrent = maxOf( (supply.inventoryCurrent + supply.restockRate), supply.inventoryMax )
+            }
+            for (demand in location.demand) {
+                demand.unitsDemanded = demand.unitsDemanded + demand.demandRate
+            }
+        }
+    }
+
 
     override fun doTick() {
         //prepareIdleWorkers()
+        doRestock()
         assignTradeJobs()
         doWork()
     }
@@ -83,14 +105,14 @@ object EconomyEngine : ServerTick {
             val location = queue.removeFirst()
             //Do we have demand
             for (demand in location.demand) {
-                if (demand.tradeGood == tradeGood) {
+                if (demand.tradeGood == tradeGood && demand.unitsDemanded > 0) {
                     tradeGoodDemand = demand
                     println(tradeGoodDemand)
                 }
             }
             //Do we have supply
             for (supply in location.supply) {
-                if (supply.tradeGood == tradeGood) {
+                if (supply.tradeGood == tradeGood && supply.inventoryCurrent > 0) {
                     tradeGoodSupply = supply
                     println(tradeGoodSupply)
                 }

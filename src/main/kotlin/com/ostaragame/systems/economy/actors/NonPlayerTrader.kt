@@ -109,11 +109,12 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
     }
 
     private fun pickupSupplies() {
-        println("Trader $name is picking up supplies")
         //TODO The loading of cargo needs to be managed by something else as traders could pull cargo that doesn't exist, or have multithreading issues
         tradeMission?.let {
-            if (it.supply.inventoryCurrent > 0 && availableCargoSpace() > 0) {
-                val amountToLoad = minOf(it.supply.inventoryCurrent, availableCargoSpace())
+            if (it.supply.inventoryCurrent > 0 && availableCargoSpace() > 0 && it.demand.unitsDemanded > 0) {
+                //TODO Overhauler trait will treat this differently
+                val amountToLoad = minOf(it.supply.inventoryCurrent, availableCargoSpace(), it.demand.unitsDemanded)
+                println("Trader $name is picking up supplies $amountToLoad units of ${it.tradeGood.name}")
                 //TODO Use the price of the supply, not the cost
                 money = money.minus(amountToLoad*it.supply.tradeGood.cost)
                 it.supply.inventoryCurrent = it.supply.inventoryCurrent.minus(amountToLoad)
@@ -125,7 +126,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
             } else {
                 //TODO Handle no available cargo space, and how long does a trader wait if there is no stock? Or how much will the trader accept as a minimum stock
                 goIdle()
-                println("Trader $name has no supplies to pickup")
+                println("Trader $name is unable to pickup supplies")
             }
         }
         //TODO A trader could be stuck here if the trade mission is null?
@@ -176,7 +177,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
             } else {
                 //TODO Handle no available demand, and how long does a trader wait to sell
                 goIdle()
-                println("Trader $name has no supplies to deliver")
+                println("Trader $name unable to deliver due to no demand")
             }
         }
         //TODO A trader could be stuck here if the trade mission is null?
