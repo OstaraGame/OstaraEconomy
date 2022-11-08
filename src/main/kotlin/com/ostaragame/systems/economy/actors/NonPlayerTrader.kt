@@ -5,8 +5,9 @@ import com.ostaragame.systems.economy.WorldTradeMap
 import com.ostaragame.systems.economy.engine.RouteLeg
 import com.ostaragame.systems.economy.engine.TradeGood
 import com.ostaragame.systems.economy.engine.TradeMission
-import java.util.LinkedList
+import kotlinx.serialization.Serializable
 
+@Serializable
 class NonPlayerTrader(val name: String, val traits: Traits) {
 
     private var state:TraderState = TraderState.IDLE
@@ -16,7 +17,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
     var money = 0.0F
 
     var tradeMission:TradeMission? = null
-    var route: ArrayDeque<RouteLeg> = ArrayDeque()
+    var route = mutableListOf<RouteLeg>()
     var distanceRemainingToNextLocation: Float = 0.0F
     var currentLeg: RouteLeg? = null
     var destinationLocation: Location = currentLocation
@@ -29,6 +30,10 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
         return false
     }
 
+    fun isIdle():Boolean {
+        return state == TraderState.IDLE
+    }
+
     fun readyForWork() {
         state = TraderState.LOOKING_FOR_WORK
     }
@@ -38,7 +43,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
         tradeMission = null
     }
 
-    fun foundWork(newTradeMission: TradeMission, newRoute:ArrayDeque<RouteLeg>):Boolean {
+    fun foundWork(newTradeMission: TradeMission, newRoute:MutableList<RouteLeg>):Boolean {
         if (state == TraderState.LOOKING_FOR_WORK) {
             state = TraderState.TRAVELING_TO_SUPPLY
             tradeMission = newTradeMission
@@ -185,9 +190,10 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
 
     fun completedDelivery() {
         println("Trader $name now has $$money")
-        state = TraderState.LOOKING_FOR_WORK
+        readyForWork()
         //If the trader goes Idle, then they are not looking for work for a while...
     }
+
     private fun doTravel(): Boolean {
         //TODO This will be rewritten tu support multiple activities at the same location. Probably this needs to not return a boolean, but the activity to do?
         var arrived = false
@@ -198,17 +204,15 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
             if (currentLeg == null && route.isNotEmpty()) {
                 destinationLocation = route.last().nextStop
                 currentLeg = route.removeFirst()
-                if (currentLocation != destinationLocation && currentLeg?.traderActivity == TraderActivity.NONE) { //Did we start where we already need to be? Meaning the currentLocation is the nextStop of the first RouteLeg
-                    currentLeg?.let { distanceRemainingToNextLocation = it.connection.distance }
-                    if (distanceRemainingToNextLocation <= 0) {
-                        goIdle()
-                        error("Trader moved to first leg and it has no distance or connection")
-                    }
-                }
+                currentLeg?.let{ distanceRemainingToNextLocation = it.connection.distance }
+            } else if (currentLeg == null){
+                goIdle()
+                //TODO This will throw an unhandled exception. Probably want something else to happen like log the error
+                error("Trader was traveling to supply and had no Route!")
             }
         } else {
             goIdle()
-            error("Trader was traveling to supply and had no TradeMission?")
+            println("WARNING: Trader ${name} was traveling to supply and had no TradeMission?")
         }
 
         //Traverse distance on leg at traders travel rate

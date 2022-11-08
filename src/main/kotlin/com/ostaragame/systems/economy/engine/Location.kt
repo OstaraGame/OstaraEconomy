@@ -1,10 +1,12 @@
 package com.ostaragame.systems.economy.engine
 
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
+import kotlinx.serialization.Serializable
 
-data class Location(val name: String, val id: Int, val supply: MutableCollection<TradeGoodSupply>, val demand: MutableCollection<TradeGoodDemand>,
-                    val connections: MutableCollection<Connection>,
-                    val travelers: MutableCollection<NonPlayerTrader>) {
+@Serializable
+data class Location(val name: String, val id: Int, val supply: MutableList<TradeGoodSupply>, val demand: MutableList<TradeGoodDemand>,
+                    val connections: MutableList<Connection>,
+                    val travelers: MutableList<NonPlayerTrader>) {
     override fun toString(): String {
         return "($name)"
     }
@@ -12,10 +14,10 @@ data class Location(val name: String, val id: Int, val supply: MutableCollection
     override fun hashCode(): Int {
         return name.hashCode()
     }
-    fun neighbors() : List<Location> {
-        val neighborList = mutableListOf<Location>()
+    fun neighbors() : List<String> {
+        val neighborList = mutableListOf<String>()
         for ( connection in connections ) {
-            if (connection.location1 != this ) {
+            if (connection.location1 != this.name ) {
                 neighborList.add(connection.location1)
             } else {
                 neighborList.add(connection.location2)
@@ -28,7 +30,7 @@ data class Location(val name: String, val id: Int, val supply: MutableCollection
         var distance = Float.MAX_VALUE
         //connectionFor(connectedLocation)?.let( distance = connection.distance)
         for ( connection in connections ) {
-            if (connection.location1 == connectedLocation || connection.location2 == connectedLocation ) {
+            if (connection.location1 == connectedLocation.name || connection.location2 == connectedLocation.name) {
                 distance = connection.distance
             }
         }
@@ -37,7 +39,7 @@ data class Location(val name: String, val id: Int, val supply: MutableCollection
 
     fun connectionFor(connectedLocation: Location) : Connection? {
         for ( connection in connections ) {
-            if (connection.location1 == connectedLocation || connection.location2 == connectedLocation ) {
+            if (connection.location1 == connectedLocation.name || connection.location2 == connectedLocation.name) {
                 return connection
             }
         }

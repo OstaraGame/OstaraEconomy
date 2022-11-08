@@ -16,7 +16,7 @@ object WorldTradeMap {
     private var generatedlocationId:Int = 0
     //TODO singleton ID generation not working
     fun getNextLocationId():Int {
-            synchronized(generatedlocationId) {
+            synchronized(this) {
                 generatedlocationId = generatedlocationId++
                 return generatedlocationId
             }
@@ -43,7 +43,7 @@ object WorldTradeMap {
     }
 
     //TODO This needs to be rewritten, and actually use a min queue, and a better way to assemble the final route.
-    fun findRoute(
+    private fun findRoute(
         startingLocation: Location,
         destinationLocation: Location,
         traits: Traits,
@@ -75,12 +75,12 @@ object WorldTradeMap {
             }
 
             for ( neighborV in nextNearestLocationU.neighbors()) {
-                if ( queue.contains(neighborV) || distance[neighborV] == Float.MAX_VALUE) {
-                    val altDistance = distance[nextNearestLocationU]!! + nextNearestLocationU.connectionDistance(neighborV)
-                    if (altDistance < distance[neighborV]!!) {
-                        distance[neighborV] = altDistance
-                        prev[neighborV] = nextNearestLocationU
-                        queue.add(neighborV)
+                if ( queue.contains(locations[neighborV]) || distance[locations[neighborV]] == Float.MAX_VALUE) {
+                    val altDistance = distance[nextNearestLocationU]!! + nextNearestLocationU.connectionDistance(locations[neighborV]!!)
+                    if (altDistance < distance[locations[neighborV]]!!) {
+                        distance[locations[neighborV]!!] = altDistance
+                        prev[locations[neighborV]!!] = nextNearestLocationU
+                        queue.add(locations[neighborV])
                     }
                 }
             }
@@ -95,22 +95,21 @@ object WorldTradeMap {
             }
         }
 
-            //TODO Some sort of self connection or other way of not needing a connection for a route that is to the same location?
-            for ((index, location) in shortestPath.withIndex()) {
-                if (index + 1 <= shortestPath.size - 1) {
-                    val nextLocation = shortestPath[index + 1]
-                    val activityAtStop =
-                        if (nextLocation == destinationLocation) traderActivity else NonPlayerTrader.TraderActivity.NONE
-                    val connection: Connection? = location.connectionFor(nextLocation)
+        //TODO Some sort of self connection or other way of not needing a connection for a route that is to the same location?
+        for ((index, location) in shortestPath.withIndex()) {
+            if (index + 1 <= shortestPath.size - 1) {
+                val nextLocation = shortestPath[index + 1]
+                val activityAtStop =
+                    if (nextLocation == destinationLocation) traderActivity else NonPlayerTrader.TraderActivity.NONE
+                val connection: Connection? = location.connectionFor(nextLocation)
 
-                    connection?.let { route.add(RouteLeg(it, nextLocation, activityAtStop)) }
+                connection?.let { route.add(RouteLeg(it, nextLocation, activityAtStop)) }
 
-                } else {
-                    //the last item in the route was covered in the location.connectionFor(nextLocation) or by the initial IF. This should not happen...
-                    println("The Last Item in the route: $location")
-                }
+            } else {
+                //the last item in the route was covered in the location.connectionFor(nextLocation) or by the initial IF. This should not happen...
+                //println("The Last Item in the route: $location")
             }
-//        }
+        }
 
         return route
     }

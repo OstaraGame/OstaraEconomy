@@ -1,0 +1,92 @@
+[
+    {
+        "location1": "Old Town",
+        "location2": "Scrapyard",
+        "distance": 20.0,
+        "infrastructure": "ROUGH",
+        "terrain": "HILLS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Old Town",
+        "location2": "Lucky Bend",
+        "distance": 100.0,
+        "infrastructure": "IMPROVED",
+        "terrain": "HILLS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Old Town",
+        "location2": "Badlands",
+        "distance": 120.0,
+        "infrastructure": "ROUGH",
+        "terrain": "PLAINS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Lucky Bend",
+        "location2": "Bluewater",
+        "distance": 120.0,
+        "infrastructure": "IMPROVED",
+        "terrain": "PLAINS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Lucky Bend",
+        "location2": "Badlands",
+        "distance": 200.0,
+        "infrastructure": "ROUGH",
+        "terrain": "PLAINS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Badlands",
+        "location2": "Albuquerque",
+        "distance": 100.0,
+        "infrastructure": "TRAILS",
+        "terrain": "DESERT",
+        "weather": "HOT",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Badlands",
+        "location2": "Black Rock Canyon Town",
+        "distance": 50.0,
+        "infrastructure": "IMPROVED",
+        "terrain": "HILLS",
+        "weather": "HOT",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Black Rock Canyon Town",
+        "location2": "South Albuquerque Farms",
+        "distance": 75.0,
+        "infrastructure": "IMPROVED",
+        "terrain": "RIVERS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    },
+    {
+        "location1": "Albuquerque",
+        "location2": "South Albuquerque Farms",
+        "distance": 15.0,
+        "infrastructure": "EFFICIENT",
+        "terrain": "PLAINS",
+        "weather": "CLEAR",
+        "travelers": [
+        ]
+    }
+]

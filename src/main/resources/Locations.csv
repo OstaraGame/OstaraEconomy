@@ -1,9 +1,9 @@
-ID;Name;Connections
-0;Old Town;1,2,3
-1;Scrapyard;0
-2;Lucky Bend;0,3,4
-3;Badlands;2,5,6
-4;Bluewater;2
-5;Black Rock Canyon Town;3,7
-6;Albuquerque;3,7
-7;South Albuquerque Farms;5,6
+Name,Size
+Old Town,level2
+Scrapyard,level1
+Lucky Bend,level1
+Badlands,level1
+Bluewater,level2
+Black Rock Canyon Town,level2
+Albuquerque,level3
+South Albuquerque Farms,level1

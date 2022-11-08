@@ -5,6 +5,7 @@ import com.ostaragame.systems.economy.actors.NonPlayerTrader
 
 object EconomyEngine : ServerTick {
     private val idleTraders:MutableList<NonPlayerTrader> = mutableListOf()
+    //TODO make this a set so a trader can only be added once?
     private val tradersLookingForJobs:MutableList<NonPlayerTrader> = mutableListOf()
     private val workingTraders:MutableList<NonPlayerTrader> = mutableListOf()
 
@@ -23,13 +24,13 @@ object EconomyEngine : ServerTick {
     }
 
     private fun traderLookingForWork(trader: NonPlayerTrader) {
-        if (trader.seekingWork()) {
+        if (trader.seekingWork() && ! tradersLookingForJobs.contains(trader)) {
             tradersLookingForJobs.add(trader)
         }
     }
 
     //TODO To round-robin distribute trade goods, probably not the way
-    var pointer = 0
+    private var pointer = 0
     private fun assignTradeJobs() {
 
         val tradeGoodsInWorld = TradeLibrary.tradeGoods.values
@@ -38,37 +39,54 @@ object EconomyEngine : ServerTick {
             val trader = tradersLookingForJobs.removeFirst()
             val currentLocation = trader.currentLocation
 
-            //TODO: Use traits, list of demands, value, and distances
-            val tradeGood = tradeGoodsInWorld.elementAt(pointer)
-            pointer++
-            if (pointer >= tradeGoodsInWorld.size) {
-                pointer = 0
-            }
-            val result = searchForSupplyAndDemand(currentLocation,tradeGood!!)
-            if (result.first == "Success") {
-                println("Found work for ${trader.name}, ${result.second}")
-                //Here is your route
-                val tradeMission = result.second!!
-                trader.foundWork(tradeMission, WorldTradeMap.findRouteForTradeMission(currentLocation, tradeMission, trader.traits))
+            var searchingForWork = true
+            var giveUp = false
+            val startingPointer = pointer
+            while (searchingForWork && ! giveUp) {
+                //TODO: Use traits, list of demands, value, and distances
+                val tradeGood = tradeGoodsInWorld.elementAt(pointer)
+                pointer++
+                if (pointer >= tradeGoodsInWorld.size) {
+                    pointer = 0
+                }
+                val result = searchForSupplyAndDemand(currentLocation,tradeGood)
+                if (result.first == "Success") {
+                    println("Found work for ${trader.name}, ${result.second}")
+                    //Here is your route
+                    val tradeMission = result.second!!
+                    trader.foundWork(tradeMission, WorldTradeMap.findRouteForTradeMission(currentLocation, tradeMission, trader.traits))
 
-                //Maybe Cache Routes Here?
-                workingTraders.add(trader)
-            } else {
-                println("No work found for ${trader.name}")
+                    //Maybe Cache Routes Here?
+                    workingTraders.add(trader)
+                    searchingForWork = false
+                } else if (startingPointer == pointer){
+                    giveUp = true
+                } else {
+                    println("No work found for ${trader.name} ${tradeGood.name}")
+                }
+            }
+            if (giveUp) {
+                println("No work found for ${trader.name} going Idle")
                 //TODO does the trader go idle if no work is found, or do they keep looking for work, and for how long? Trait controlled?
-                //trader.goIdle()
-                //idleTraders.add(trader)
+                trader.goIdle()
+                idleTraders.add(trader)
             }
         }
 
     }
 
     private fun doWork() {
-        for (trader in workingTraders) {
-            if (trader.seekingWork())
+        val immutableList = workingTraders.toTypedArray()
+        for (trader in immutableList) {
+            if (trader.seekingWork()) {
+                workingTraders.remove(trader)
                 traderLookingForWork(trader)
-            else
+            } else if (trader.isIdle()) {
+                workingTraders.remove(trader)
+                registerTrader(trader)
+            } else {
                 trader.doWork()
+            }
         }
     }
 
@@ -85,11 +103,38 @@ object EconomyEngine : ServerTick {
     }
 
 
+    /*
+        TODO: I was thinking of a time class that handled some of the work of counting time,
+         advancing mission ticks, economic ticks
+         do work every tick
+         10 ticks = 1 day
+         prepare idle workers daily
+         Assign trade jobs every 5 ticks (1 & 6)
+         doRestock every 3 days
+     */
+    private var dayCount = 1
+    private var tickCount = 0
     override fun doTick() {
-        //prepareIdleWorkers()
-        doRestock()
-        assignTradeJobs()
+        tickCount++
+        if (tickCount % 10 == 0) {
+            prepareIdleWorkers()
+        }
+
+        if (dayCount % 3 == 0) {
+            doRestock()
+        }
+
+        if (tickCount == 1 || tickCount == 6) {
+            assignTradeJobs()
+        }
+
         doWork()
+
+        if (tickCount % 10 == 0) {
+            tickCount = 0
+            dayCount++
+            println("***** Day $dayCount *****")
+        }
     }
 
 
@@ -119,10 +164,10 @@ object EconomyEngine : ServerTick {
             }
             visitedMap[location.name] = location
             for (connection in location.connections) {
-                if (!visitedMap.containsKey(connection.location1.name))
-                    queue.add(connection.location1)
-                if (!visitedMap.containsKey(connection.location2.name))
-                    queue.add(connection.location2)
+                if (!visitedMap.containsKey(connection.location1))
+                    queue.add(WorldTradeMap.locations[connection.location1]!!)
+                if (!visitedMap.containsKey(connection.location2))
+                    queue.add(WorldTradeMap.locations[connection.location2]!!)
             }
             stillLooking = tradeGoodSupply == null || tradeGoodDemand == null
 

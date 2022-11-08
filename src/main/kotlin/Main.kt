@@ -20,9 +20,11 @@ fun main(args: Array<String>) {
 
 
     val dataLoader = LocationDataLoader()
-
+    val sceneTree = SceneTree
     SceneTree.worldTradeMap = WorldTradeMap
-    dataLoader.loadLocationListIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+    //dataLoader.loadLocationListIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+    dataLoader.loadLocationAndConnectionsIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+//    dataLoader.writeOutConnections()
 
     /* <TRADERS> */
 
@@ -40,21 +42,21 @@ fun main(args: Array<String>) {
 
 
     SceneTree.tradeLibrary = TradeLibrary
-    dataLoader.loadTradeGoods(SceneTree.tradeLibrary)
+    dataLoader.loadTradeGoods()
 
     println("We can has water? " + SceneTree.tradeLibrary.tradeGoods["Water"])
     println("Does Old Town Exist? " + (SceneTree.worldTradeMap.locations["Old Town"]?.name ?: "No"))
     println("Does South Albuquerque Farms Exist? " + (SceneTree.worldTradeMap.locations["South Albuquerque Farms"]?.name
         ?: "No"))
 
-    dataLoader.loadTradeGoodDemands(SceneTree.tradeLibrary, SceneTree.worldTradeMap)
+    dataLoader.loadTradeGoodDemands(SceneTree.worldTradeMap)
    // println(SceneTree.worldTradeMap.locations["Old Town"]?.demand?.first())
 
-    dataLoader.loadTradeGoodSupply(SceneTree.tradeLibrary, SceneTree.worldTradeMap)
+    dataLoader.loadTradeGoodSupply(SceneTree.worldTradeMap)
    // println(SceneTree.worldTradeMap.locations["Albuquerque"]?.supply?.first())
 
     TradeViewer.updateSupplyAndDemandOnGraph()
-//    val viewer:Viewer = TradeViewer.graph.display()
+    val viewer:Viewer = TradeViewer.graph.display()
 
 
 
@@ -98,7 +100,7 @@ fun main(args: Array<String>) {
             sleep(1000)
             EconomyEngine.doTick()
         }
-
+//
 /*
 3 types of goods - shapes
 Supply on right side, demand on left side

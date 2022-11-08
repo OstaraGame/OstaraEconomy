@@ -1,5 +1,17 @@
 Name,Type,Cost,Volume
 Water,ALCHEMY,10,1
+Fiber,TEXTILES,3,20
 Fabric,TEXTILES,15,20
+Clothing,WEARABLES,30,6
+Rope,TOOLS,30,5
+Shoes,WEARABLES,60,2
 Glass,WIDGETS,1,1
+SS Bottles,WIDGETS,5,1
 Parts,SPECIAL,300,.1
+Sewing Needles,TOOLS,1,.01
+Fruit,EDIBLES,3,1
+Grain,EDIBLES,2,10
+Food,EDIBLES,2,3
+Fuel,FUELS,50,1
+Building Materials,BUILDING,14,5
+Ore,MINERALS,30,100
