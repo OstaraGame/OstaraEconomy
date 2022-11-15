@@ -25,13 +25,13 @@ object WorldTradeMap {
     fun findRouteForTradeMission(startingLocation: Location, tradeMission: TradeMission, traits: Traits) : ArrayDeque<RouteLeg> {
 
         val newRoute = ArrayDeque<RouteLeg>()
-        val firstPartOfRoute = findRoute(startingLocation,
+        findRoute(startingLocation,
             tradeMission.supply.location,
             traits,
             NonPlayerTrader.TraderActivity.PICKUP,
             newRoute)
 
-        val secondPartOfRoute = findRoute(
+        findRoute(
             tradeMission.supply.location,
             tradeMission.demand.location,
             traits,
@@ -42,7 +42,8 @@ object WorldTradeMap {
         return newRoute
     }
 
-    //TODO This needs to be rewritten, and actually use a min queue, and a better way to assemble the final route.
+    //TODO Possible further optimization by implementing a Priority Queue that can reorder nodes instead of needing to remove and re-add (research runtime improvements)
+    // TODO A better way to assemble the final route?
     private fun findRoute(
         startingLocation: Location,
         destinationLocation: Location,
@@ -95,9 +96,10 @@ object WorldTradeMap {
             }
         }
 
-        //TODO Some sort of self connection or other way of not needing a connection for a route that is to the same location?
         for ((index, location) in shortestPath.withIndex()) {
-            if (index + 1 <= shortestPath.size - 1) {
+            if (shortestPath.size == 1) {
+                route.add(RouteLeg(SelfConnection, location, traderActivity))
+            } else if (index + 1 <= shortestPath.size - 1) {
                 val nextLocation = shortestPath[index + 1]
                 val activityAtStop =
                     if (nextLocation == destinationLocation) traderActivity else NonPlayerTrader.TraderActivity.NONE

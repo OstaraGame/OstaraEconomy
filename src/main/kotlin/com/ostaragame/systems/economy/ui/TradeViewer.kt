@@ -88,6 +88,16 @@ object TradeViewer {
             "	shape: cross;" +
             "   fill-color: blue;" +
             "}"+
+            "sprite.traderderrmann {" +
+            "	size: 15px, 15px;" +
+            "	shape: cross;" +
+            "   fill-color: green;" +
+            "}"+
+            "sprite.traderanon {" +
+            "	size: 15px, 15px;" +
+            "	shape: cross;" +
+            "   fill-color: red;" +
+            "}"+
             "sprite.water {" +
             "	size: 15px, 15px;" +
             "	shape: circle;" +

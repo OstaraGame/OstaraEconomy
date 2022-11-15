@@ -2,12 +2,27 @@ package com.ostaragame.systems.economy.engine
 
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 
 @Serializable
 data class Connection(val location1: String, val location2: String, val distance: Float,
                       var infrastructure: Infrastructure, val terrain: Terrain, var weather: Weather,
-                      var travelers: MutableList<NonPlayerTrader>, )
+                      var travelers: MutableList<NonPlayerTrader>, ) {
+
+
+    fun name(): String {
+        return "${location1}-${location2}"
+    }
+
+    fun travelDirection(startLocationName:String): Int {
+        if (startLocationName == location1)
+            return 0
+        else
+            return 1
+    }
+
+}
+val SelfConnection = Connection("Self", "Self", 0.0f, Infrastructure.NONE, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+
 
 /*
 NONE - Wild Country

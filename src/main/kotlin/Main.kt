@@ -4,8 +4,9 @@ import com.ostaragame.systems.economy.WorldTradeMap
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 import com.ostaragame.systems.economy.actors.Traits
 import com.ostaragame.systems.economy.engine.EconomyEngine
+import com.ostaragame.systems.economy.engine.SelfConnection
 import com.ostaragame.systems.economy.engine.TradeLibrary
-import com.ostaragame.systems.economy.ui.GraphMouseEventManager
+import com.ostaragame.systems.economy.ui.NPTGraphSprite
 import com.ostaragame.systems.economy.utility.LocationDataLoader
 import org.graphstream.ui.spriteManager.Sprite
 import org.graphstream.ui.view.Viewer
@@ -20,23 +21,32 @@ fun main(args: Array<String>) {
 
 
     val dataLoader = LocationDataLoader()
-    val sceneTree = SceneTree
+    @Suppress("UNUSED_VARIABLE") val sceneTree = SceneTree
     SceneTree.worldTradeMap = WorldTradeMap
-    //dataLoader.loadLocationListIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
     dataLoader.loadLocationAndConnectionsIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+    /*
+     Uncomment below to write out a JSON file connections.json. Then move to the resources directory to update the
+        starting connection list
+     */
 //    dataLoader.writeOutConnections()
 
     /* <TRADERS> */
 
-    val aTrader = NonPlayerTrader("Yukon Gold!", Traits())
+    val aTrader = NonPlayerTrader("Yukon Gold!", Traits(visibleInWorld = true))
+//    aTrader.currentLocation = SceneTree.worldTradeMap.locations["Albuquerque"]!!
     aTrader.currentLocation = SceneTree.worldTradeMap.locations["Lucky Bend"]!!
     SceneTree.worldTradeMap.locations["Lucky Bend"]!!.travelers.add(aTrader)
     EconomyEngine.registerTrader(aTrader)
 
-    val bTrader = NonPlayerTrader("Derr_Mann", Traits())
+    val bTrader = NonPlayerTrader("Derr_Mann", Traits(visibleInWorld = true))
     bTrader.currentLocation = SceneTree.worldTradeMap.locations["Bluewater"]!!
     SceneTree.worldTradeMap.locations["Bluewater"]!!.travelers.add(bTrader)
     EconomyEngine.registerTrader(bTrader)
+
+    val cTrader = NonPlayerTrader("Anon1", Traits(visibleInWorld = true))
+    cTrader.currentLocation = SceneTree.worldTradeMap.locations["Scrapyard"]!!
+    SceneTree.worldTradeMap.locations["Scrapyard"]!!.travelers.add(cTrader)
+    EconomyEngine.registerTrader(cTrader)
 
     /* </TRADERS> */
 
@@ -44,10 +54,10 @@ fun main(args: Array<String>) {
     SceneTree.tradeLibrary = TradeLibrary
     dataLoader.loadTradeGoods()
 
-    println("We can has water? " + SceneTree.tradeLibrary.tradeGoods["Water"])
-    println("Does Old Town Exist? " + (SceneTree.worldTradeMap.locations["Old Town"]?.name ?: "No"))
-    println("Does South Albuquerque Farms Exist? " + (SceneTree.worldTradeMap.locations["South Albuquerque Farms"]?.name
-        ?: "No"))
+//    println("We can has water? " + SceneTree.tradeLibrary.tradeGoods["Water"])
+//    println("Does Old Town Exist? " + (SceneTree.worldTradeMap.locations["Old Town"]?.name ?: "No"))
+//    println("Does South Albuquerque Farms Exist? " + (SceneTree.worldTradeMap.locations["South Albuquerque Farms"]?.name
+//        ?: "No"))
 
     dataLoader.loadTradeGoodDemands(SceneTree.worldTradeMap)
    // println(SceneTree.worldTradeMap.locations["Old Town"]?.demand?.first())
@@ -68,21 +78,91 @@ fun main(args: Array<String>) {
 //    fromViewer.addSink(TradeViewer.graph)
 
 
-    //TODO Pull the starting position from the travelers list for the locations
-    val raiderSprite:Sprite = TradeViewer.spriteManager.addSprite("Raider1")
-    raiderSprite.attachToNode("Badlands")
+    /*
+        Sprite Manager code here
+     */
+    val sprites:MutableMap<String,NPTGraphSprite> = mutableMapOf()
+    var visibleTraderList = EconomyEngine.visibleTraders()
+    for (trader in visibleTraderList) {
+        val traderSprite:Sprite = TradeViewer.spriteManager.addSprite(trader.name)
+        traderSprite.attachToNode(trader.currentLocation.name )
 
-    val yukonSprite:Sprite = TradeViewer.spriteManager.addSprite("Yukon Gold!")
-    yukonSprite.attachToNode("Lucky Bend")
-    yukonSprite.setAttribute("ui.class", "trader")
+        if (trader.name == "Derr_Mann") {
+            traderSprite.setAttribute("ui.class", "traderderrmann")
+        } else if (trader.name == "Anon1") {
+            traderSprite.setAttribute("ui.class", "traderanon")
+        }else {
+            traderSprite.setAttribute("ui.class", "trader")
+        }
+        sprites[trader.name] = NPTGraphSprite(traderSprite,"",0.0)
+    }
 
-//    EconomyEngine.doTick()
-//    MissionEngine.doTick()
-//        var traderPos:Double = 0.0
-//        var raiderPos:Double = -15.0
+
+//    val raiderSprite:Sprite = TradeViewer.spriteManager.addSprite("Raider1")
+//    raiderSprite.attachToNode("Badlands")
+
     EconomyEngine.prepareIdleWorkers()
-        while (true) {
-//            fromViewer.pump()
+    var frames = 60.0
+
+    val traderOnEdge:MutableMap<NonPlayerTrader,String?> = mutableMapOf()
+    val framerate = 60
+    while (true) {
+        sleep(16)
+        if (frames >=  framerate) {
+            EconomyEngine.doTick()
+            //MissionEngine.doTick()
+            visibleTraderList = EconomyEngine.visibleTraders()
+            frames = 0.0
+        }
+        frames++
+
+        for (trader in visibleTraderList) {
+            trader.currentLeg?.let {currentLeg ->
+                currentLeg.connection.let { connection ->
+                    val direction = connection.travelDirection(trader.currentLocation.name)
+                    val nptGraphSprite:NPTGraphSprite = sprites[trader.name]!!
+                    val priorEdgeName:String? = traderOnEdge[trader]
+                    var priorEdge = ""
+                    if (priorEdgeName != null) {
+                        priorEdge = priorEdgeName
+                    }
+                    if (priorEdge != connection.name()) {
+                        if (SelfConnection == connection) {
+                            nptGraphSprite.sprite.attachToNode(trader.currentLocation.name)
+                            traderOnEdge[trader] = trader.currentLocation.name
+                        } else {
+                            nptGraphSprite.sprite.attachToEdge(connection.name())
+                            traderOnEdge[trader] = connection.name()
+                            nptGraphSprite.travelPercentage = 0.0
+                        }
+                    }
+                    if (connection.distance > 0) {
+                        val travelPct =
+                            ((connection.distance - trader.distanceRemainingToNextLocation) / connection.distance.toDouble())
+                        val speedPct = trader.effectiveSpeed() / connection.distance.toDouble()
+                        if (nptGraphSprite.travelPercentage <= travelPct + speedPct) {
+                            val delta = (speedPct) / framerate
+                            nptGraphSprite.travelPercentage += delta
+                        } else {
+                            nptGraphSprite.travelPercentage = travelPct
+                        }
+
+                        val vector = if (direction == 0) {
+                            nptGraphSprite.travelPercentage
+                        } else {
+                            direction - nptGraphSprite.travelPercentage
+                        }
+
+                        nptGraphSprite.sprite.setPosition(vector)
+                    }
+                    //println(vector)
+                }
+
+
+            }
+
+        }
+        //            fromViewer.pump()
 //            raiderPos += 1.5
 //            traderPos += 1
 //            if (traderPos >= 100.0) {
@@ -97,9 +177,7 @@ fun main(args: Array<String>) {
 //            }
 //            yukonSprite.setPosition(traderPos/100.0)
 //            raiderSprite.setPosition(raiderPos/100.0)
-            sleep(1000)
-            EconomyEngine.doTick()
-        }
+    }
 //
 /*
 3 types of goods - shapes

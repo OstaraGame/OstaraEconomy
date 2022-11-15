@@ -194,6 +194,10 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
         //If the trader goes Idle, then they are not looking for work for a while...
     }
 
+    fun effectiveSpeed():Float {
+        //TODO Account for terrain and other factors of currentLeg with Traits
+        return traits.travelSpeed
+    }
     private fun doTravel(): Boolean {
         //TODO This will be rewritten tu support multiple activities at the same location. Probably this needs to not return a boolean, but the activity to do?
         var arrived = false
@@ -205,6 +209,8 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
                 destinationLocation = route.last().nextStop
                 currentLeg = route.removeFirst()
                 currentLeg?.let{ distanceRemainingToNextLocation = it.connection.distance }
+                println("Trader $name is traveling towards ${currentLeg?.nextStop}, dist remaining: $distanceRemainingToNextLocation")
+                return false
             } else if (currentLeg == null){
                 goIdle()
                 //TODO This will throw an unhandled exception. Probably want something else to happen like log the error

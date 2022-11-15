@@ -4,23 +4,32 @@ import com.ostaragame.systems.economy.WorldTradeMap
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 
 object EconomyEngine : ServerTick {
-    private val idleTraders:MutableList<NonPlayerTrader> = mutableListOf()
-    //TODO make this a set so a trader can only be added once?
+    private val nonPlayerTraders:MutableSet<NonPlayerTrader> = mutableSetOf()
+
     private val tradersLookingForJobs:MutableList<NonPlayerTrader> = mutableListOf()
     private val workingTraders:MutableList<NonPlayerTrader> = mutableListOf()
 
+    /**
+     * For Setup, new traders are added to the engine here. If called multiple times with the same trader,
+     * the trader will only exist once (in a set). Traders added after the engine is running will begin working at the
+     * next tick that calls prepareIdleWorkers()
+     */
     fun registerTrader(trader: NonPlayerTrader) {
-        //TODO Make sure a trader is only added once
-        idleTraders.add(trader)
+        nonPlayerTraders.add(trader)
     }
 
 
     fun prepareIdleWorkers() {
-        while (idleTraders.isNotEmpty()) {
-            val trader = idleTraders.removeFirst()
-            trader.readyForWork()
-            traderLookingForWork(trader)
+        for (trader in nonPlayerTraders) {
+            if (trader.isIdle()) {
+                trader.readyForWork()
+                traderLookingForWork(trader)
+            }
         }
+    }
+
+    fun visibleTraders():List<NonPlayerTrader> {
+        return nonPlayerTraders.filter { it.traits.visibleInWorld }
     }
 
     private fun traderLookingForWork(trader: NonPlayerTrader) {
@@ -69,7 +78,7 @@ object EconomyEngine : ServerTick {
                 println("No work found for ${trader.name} going Idle")
                 //TODO does the trader go idle if no work is found, or do they keep looking for work, and for how long? Trait controlled?
                 trader.goIdle()
-                idleTraders.add(trader)
+                nonPlayerTraders.add(trader)
             }
         }
 
@@ -83,7 +92,6 @@ object EconomyEngine : ServerTick {
                 traderLookingForWork(trader)
             } else if (trader.isIdle()) {
                 workingTraders.remove(trader)
-                registerTrader(trader)
             } else {
                 trader.doWork()
             }
