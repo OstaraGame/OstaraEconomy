@@ -1,5 +1,6 @@
 package com.ostaragame.systems.economy.actors
 
+import com.ostaragame.systems.economy.engine.Weather
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -8,8 +9,8 @@ class Traits (){
         this.visibleInWorld = visibleInWorld
     }
 
-    var travelSpeed:Float = 10.0F
-    val maxCargoUnits = 100.0F
+    var travelSpeed:Double = 10.0
+    val maxCargoUnits = 100.0f
     var visibleInWorld = false
 
     //Overhauler: Picks up more supplies than the demand calls for
@@ -24,4 +25,17 @@ class Traits (){
     //Risky - willing to off on roads without much info
     //High Standards/profit margin
 
+    fun weatherTravelEffect(currentWeather: Weather) : Double {
+        return when (currentWeather) {
+            Weather.CLEAR -> 1.0
+            Weather.CLOUDY -> .98
+            Weather.FOG -> .5
+            Weather.HOT -> .5
+            Weather.RAIN -> .85
+            Weather.SNOW -> .4
+            Weather.COLD -> .75
+            Weather.HURRICANE -> .01
+            Weather.BLIZZARD -> .01
+        }
+    }
 }

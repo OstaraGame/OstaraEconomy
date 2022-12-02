@@ -194,9 +194,11 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
         //If the trader goes Idle, then they are not looking for work for a while...
     }
 
-    fun effectiveSpeed():Float {
+    fun effectiveSpeed():Double {
         //TODO Account for terrain and other factors of currentLeg with Traits
-        return traits.travelSpeed
+        var adjustedSpeed = traits.travelSpeed
+        currentLeg.let { adjustedSpeed *= traits.weatherTravelEffect(it!!.connection.weather) }
+        return adjustedSpeed
     }
     private fun doTravel(): Boolean {
         //TODO This will be rewritten tu support multiple activities at the same location. Probably this needs to not return a boolean, but the activity to do?
@@ -223,7 +225,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
 
         //Traverse distance on leg at traders travel rate
         //Check to see if we have arrived at end of leg, if so get next leg and reset travel distance
-        distanceRemainingToNextLocation = distanceRemainingToNextLocation.minus(traits.travelSpeed)
+        distanceRemainingToNextLocation = distanceRemainingToNextLocation.minus(effectiveSpeed())
         if (distanceRemainingToNextLocation <= 0) {
             currentLeg?.let { currentLocation = it.nextStop }
             println("Trader $name is at $currentLocation, continuing to travel")
