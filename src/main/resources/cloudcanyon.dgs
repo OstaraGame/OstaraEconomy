@@ -1,0 +1,27 @@
+DGS004
+OstaraCloudCanyon 0 18
+st 0
+an "Old Town" "xyz":500.0,1000.0,0 "ui.label":"Old Town" "ui.class":"level2"
+an "Scrapyard" "xyz":600.0,1000.0,0 "ui.label":"Scrapyard" "ui.class":"level1"
+an "Lucky Bend" "xyz":400.0,600.0,0 "ui.label":"Lucky Bend" "ui.class":"level1"
+an "Badlands" "xyz":1000.0,800.0,0 "ui.label":"Badlands" "ui.class":"level1"
+an "Bluewater" "xyz":100.0,1100.0,0 "ui.label":"Bluewater" "ui.class":"level2"
+an "Black Rock Canyon Town" "xyz":1100.0,500.0,0 "ui.label":"Black Rock Canyon Town" "ui.class":"level2"
+an "Albuquerque" "xyz":1500.0,200.0,0 "ui.label":"Albuquerque" "ui.class":"level3"
+an "South Albuquerque Farms" "xyz":1525.0,100.0,0  "ui.label":"South Albuquerque Farms" "ui.class":"level1"
+
+
+ae "Old Town-Scrapyard" "Old Town" "Scrapyard" "distance":20.0 "infrastructure": "ROUGH" "terrain": "HILLS" "weather": "CLEAR"
+ae "Old Town-Lucky Bend" "Old Town" "Lucky Bend" "distance":100.0 "infrastructure": "IMPROVED" "terrain": "HILLS" "weather": "CLEAR"
+ae "Old Town-Badlands" "Old Town" "Badlands" "distance":120.0 "infrastructure": "ROUGH" "terrain": "PLAINS" "weather": "CLEAR"
+ae "Lucky Bend-Bluewater" "Lucky Bend" "Bluewater" "distance":200.0 "infrastructure": "IMPROVED" "terrain": "PLAINS" "weather": "CLEAR"
+ae "Lucky Bend-Badlands" "Lucky Bend" "Badlands" "distance":200.0 "infrastructure": "ROUGH" "terrain": "PLAINS" "weather": "CLEAR"
+ae "Badlands-Albuquerque" "Badlands" "Albuquerque" "distance":100.0 "infrastructure": "TRAILS" "terrain": "DESERT" "weather": "HOT"
+ae "Badlands-Black Rock Canyon Town" "Badlands"  "Black Rock Canyon Town" "distance":50.0 "infrastructure": "IMPROVED" "terrain": "HILLS" "weather": "HOT"
+ae "Black Rock Canyon Town-South Albuquerque Farms" "Black Rock Canyon Town"  "South Albuquerque Farms" "distance":75.0 "infrastructure": "IMPROVED" "terrain": "RIVERS" "weather": "CLEAR"
+ae "Albuquerque-South Albuquerque Farms" "Albuquerque" "South Albuquerque Farms" "distance":15.0 "infrastructure": "EFFICIENT" "terrain": "PLAINS" "weather": "CLEAR"
+
+#st 1
+#an "Observatory" "xyz":0.0,500.0,0 "ui.label":"Observatory" "ui.class":"level1"
+#ae "Black Rock Canyon Town-Albuquerque" "Black Rock Canyon Town"  "Albuquerque" "distance":70.0 "infrastructure": "IMPROVED" "terrain": "RIVERS" "weather": "CLEAR"
+#ae "Bluewater-Observatory" "Bluewater"  "Observatory" "distance":100.0 "infrastructure": "TRAILS" "terrain": "MOUNTAINS" "weather": "SNOW"

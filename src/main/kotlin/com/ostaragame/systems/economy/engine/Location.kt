@@ -26,8 +26,8 @@ data class Location(val name: String, val id: Int, val supply: MutableList<Trade
         return neighborList
     }
 
-    fun connectionDistance(connectedLocation: Location) : Float {
-        var distance = Float.MAX_VALUE
+    fun connectionDistance(connectedLocation: Location) : Double {
+        var distance = Double.MAX_VALUE
         //connectionFor(connectedLocation)?.let( distance = connection.distance)
         for ( connection in connections ) {
             if (connection.location1 == connectedLocation.name || connection.location2 == connectedLocation.name) {

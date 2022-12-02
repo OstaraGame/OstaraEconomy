@@ -26,6 +26,7 @@ object TradeViewer {
     val spriteManager:SpriteManager
 
     init {
+        System.setProperty("org.graphstream.ui", "swing")
         graph = SingleGraph("Cloud Canyon")
 
         graph.setAttribute("ui.stylesheet", GRAPH_STYLESHEET)
@@ -117,5 +118,23 @@ object TradeViewer {
             "	size: 15px, 15px;" +
             "	shape: diamond;" +
             "   fill-color: orange;" +
+            "}"+
+            "sprite.SNOW {" +
+            "	size: 15px, 15px;" +
+            "	shape: cross;" +
+            "   fill-color: Snow;" +
+            "   shadow-mode: plain;" +
+            "}"+
+            "sprite.HOT {" +
+            "	size: 15px, 15px;" +
+            "	shape: circle;" +
+            "   fill-color: Yellow;" +
+            "   shadow-mode: plain;" +
+            "}"+
+            "sprite.CLEAR {" +
+            "	size: 15px, 15px;" +
+            "	shape: circle;" +
+            "   fill-color: LightBlue;" +
+            "   shadow-mode: plain;" +
             "}"
 

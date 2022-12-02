@@ -6,6 +6,7 @@ import com.ostaragame.systems.economy.actors.Traits
 import com.ostaragame.systems.economy.engine.EconomyEngine
 import com.ostaragame.systems.economy.engine.SelfConnection
 import com.ostaragame.systems.economy.engine.TradeLibrary
+import com.ostaragame.systems.economy.engine.WeatherEngine
 import com.ostaragame.systems.economy.ui.NPTGraphSprite
 import com.ostaragame.systems.economy.utility.LocationDataLoader
 import org.graphstream.ui.spriteManager.Sprite
@@ -14,16 +15,13 @@ import java.lang.Thread.sleep
 
 
 fun main(args: Array<String>) {
-    println("Hello Ostara!")
-
-    println("Program arguments: ${args.joinToString()}")
-    System.setProperty("org.graphstream.ui", "swing")
-
+    println("Ostara Economy!")
 
     val dataLoader = LocationDataLoader()
     @Suppress("UNUSED_VARIABLE") val sceneTree = SceneTree
     SceneTree.worldTradeMap = WorldTradeMap
-    dataLoader.loadLocationAndConnectionsIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+//    dataLoader.loadLocationAndConnectionsIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
+    dataLoader.loadDGSLocationAndConnectionsIntoGraph(TradeViewer.graph, SceneTree.worldTradeMap)
     /*
      Uncomment below to write out a JSON file connections.json. Then move to the resources directory to update the
         starting connection list
@@ -66,9 +64,7 @@ fun main(args: Array<String>) {
    // println(SceneTree.worldTradeMap.locations["Albuquerque"]?.supply?.first())
 
     TradeViewer.updateSupplyAndDemandOnGraph()
-    val viewer:Viewer = TradeViewer.graph.display()
-
-
+    val viewer:Viewer = TradeViewer.graph.display(false)
 
 //    viewer.defaultView.enableMouseOptions()
 
@@ -96,12 +92,15 @@ fun main(args: Array<String>) {
         }
         sprites[trader.name] = NPTGraphSprite(traderSprite,"",0.0)
     }
-
+    val BadlandsAlbuquerqueWeather:Sprite = TradeViewer.spriteManager.addSprite("Badlands-Albuquerque")
+    BadlandsAlbuquerqueWeather.attachToEdge("Badlands-Albuquerque")
+    BadlandsAlbuquerqueWeather.setPosition(.5)
 
 //    val raiderSprite:Sprite = TradeViewer.spriteManager.addSprite("Raider1")
 //    raiderSprite.attachToNode("Badlands")
 
     EconomyEngine.prepareIdleWorkers()
+    WeatherEngine.updateWeather()
     var frames = 60.0
 
     val traderOnEdge:MutableMap<NonPlayerTrader,String?> = mutableMapOf()
@@ -111,6 +110,7 @@ fun main(args: Array<String>) {
         if (frames >=  framerate) {
             EconomyEngine.doTick()
             //MissionEngine.doTick()
+            WeatherEngine.doTick()
             visibleTraderList = EconomyEngine.visibleTraders()
             frames = 0.0
         }

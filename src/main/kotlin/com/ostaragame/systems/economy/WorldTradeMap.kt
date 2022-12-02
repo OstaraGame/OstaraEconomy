@@ -8,7 +8,7 @@ import java.util.PriorityQueue
 /* All the locations and their connections and demands */
 object WorldTradeMap {
     var locations:MutableMap<String,Location> = mutableMapOf()
-
+    var connections:MutableMap<String,Connection> = mutableMapOf()
 
     val traderOffMapHome: Location = Location("Trader Off Map Starting Location", -1,
         mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf()
@@ -53,7 +53,7 @@ object WorldTradeMap {
     ) : ArrayDeque<RouteLeg> {
 
         //Dijkstra
-        val distance:  MutableMap<Location,Float> = mutableMapOf()
+        val distance:  MutableMap<Location,Double> = mutableMapOf()
         val prev:  MutableMap<Location,Location> = mutableMapOf()
 
         val compareByDistance: Comparator<Location> = compareBy { distance[it] }
@@ -61,10 +61,10 @@ object WorldTradeMap {
         val queue: PriorityQueue<Location> = PriorityQueue(locations.size, compareByDistance)
 
         for( location in locations.values ) {
-            distance[location] = Float.MAX_VALUE
+            distance[location] = Double.MAX_VALUE
         }
 
-        distance[startingLocation] = 0.0F
+        distance[startingLocation] = 0.0
         queue.add(startingLocation)
 
         var nextNearestLocationU: Location
@@ -76,7 +76,7 @@ object WorldTradeMap {
             }
 
             for ( neighborV in nextNearestLocationU.neighbors()) {
-                if ( queue.contains(locations[neighborV]) || distance[locations[neighborV]] == Float.MAX_VALUE) {
+                if ( queue.contains(locations[neighborV]) || distance[locations[neighborV]] == Double.MAX_VALUE) {
                     val altDistance = distance[nextNearestLocationU]!! + nextNearestLocationU.connectionDistance(locations[neighborV]!!)
                     if (altDistance < distance[locations[neighborV]]!!) {
                         distance[locations[neighborV]!!] = altDistance

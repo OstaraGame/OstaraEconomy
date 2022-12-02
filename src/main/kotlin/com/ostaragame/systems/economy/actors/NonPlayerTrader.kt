@@ -18,7 +18,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
 
     var tradeMission:TradeMission? = null
     var route = mutableListOf<RouteLeg>()
-    var distanceRemainingToNextLocation: Float = 0.0F
+    var distanceRemainingToNextLocation: Double = 0.0
     var currentLeg: RouteLeg? = null
     var destinationLocation: Location = currentLocation
 
@@ -240,7 +240,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
                 }
             } else {
                 currentLeg = null
-                distanceRemainingToNextLocation = 0.0F
+                distanceRemainingToNextLocation = 0.0
                 arrived = true
             }
         } else {

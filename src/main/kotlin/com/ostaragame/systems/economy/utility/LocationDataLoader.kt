@@ -13,8 +13,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
+import org.graphstream.graph.Edge
 import java.io.FileInputStream
-import java.nio.file.StandardOpenOption
 
 class LocationDataLoader {
 
@@ -36,6 +36,47 @@ class LocationDataLoader {
     }
 
 
+    fun loadDGSLocationAndConnectionsIntoGraph(graph: Graph, worldTradeMap: WorldTradeMap) {
+        println("Loading world locations")
+        val resource: URL? = LocationDataLoader::class.java.getResource("/cloudcanyon.dgs")
+        val dgsFile: File? = resource?.toURI()?.let { Paths.get(it).toFile() }
+        graph.read(dgsFile!!.path)
+        for (node in graph.nodes()) {
+            val locationName = node.id
+             if (locationName !in worldTradeMap.locations) {
+                val location = Location(
+                    locationName, WorldTradeMap.getNextLocationId(),
+                    mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf()
+                )
+                worldTradeMap.locations[locationName] = location
+            }
+        }
+
+        for (edge in graph.edges()) {
+
+            val loc0:Location? = WorldTradeMap.locations[edge.node0.id]
+            val loc1:Location? = WorldTradeMap.locations[edge.node1.id]
+            val connection = connectonForEdge(edge)
+            WorldTradeMap.connections["${edge.node0.id}-${edge.node1.id}"] = connection
+
+            loc0.let { it?.connections?.add(connection) }
+            loc1.let { it?.connections?.add(connection) }
+        }
+    }
+
+    fun connectonForEdge(edge: Edge) : Connection {
+        println( "${edge.id} ${Infrastructure.valueOf(edge.getAttribute("infrastructure", String::class.java) )}")
+
+        return Connection(
+            edge.node0.id,
+            edge.node1.id,
+            (edge.getAttribute("distance") ?: 1.0) as Double,
+            Infrastructure.valueOf(edge.getAttribute("infrastructure") as String),
+            Terrain.valueOf(edge.getAttribute("terrain") as String),
+            Weather.valueOf(edge.getAttribute("weather") as String),
+            mutableListOf()
+        )
+    }
     @OptIn(ExperimentalSerializationApi::class)
     fun loadLocationAndConnectionsIntoGraph(graph: Graph, worldTradeMap: WorldTradeMap) {
         println("Loading world locations")

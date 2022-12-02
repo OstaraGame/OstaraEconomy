@@ -4,9 +4,10 @@ import com.ostaragame.systems.economy.actors.NonPlayerTrader
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Connection(val location1: String, val location2: String, val distance: Float,
-                      var infrastructure: Infrastructure, val terrain: Terrain, var weather: Weather,
-                      var travelers: MutableList<NonPlayerTrader>, ) {
+data class Connection(
+    val location1: String, val location2: String, val distance: Double,
+    var infrastructure: Infrastructure, val terrain: Terrain, var weather: Weather,
+    var travelers: MutableList<NonPlayerTrader>, ) {
 
 
     fun name(): String {
@@ -21,7 +22,7 @@ data class Connection(val location1: String, val location2: String, val distance
     }
 
 }
-val SelfConnection = Connection("Self", "Self", 0.0f, Infrastructure.NONE, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+val SelfConnection = Connection("Self", "Self", 0.0, Infrastructure.NONE, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
 
 
 /*
