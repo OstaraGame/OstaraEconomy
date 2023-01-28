@@ -6,7 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Location(val name: String, val id: Int, val supply: MutableList<TradeGoodSupply>, val demand: MutableList<TradeGoodDemand>,
                     val connections: MutableList<Connection>,
-                    val travelers: MutableList<NonPlayerTrader>) {
+                    val travelers: MutableList<NonPlayerTrader>,
+                    val x: Double, val y: Double) {
     override fun toString(): String {
         return "($name)"
     }
@@ -14,6 +15,11 @@ data class Location(val name: String, val id: Int, val supply: MutableList<Trade
     override fun hashCode(): Int {
         return name.hashCode()
     }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
     fun neighbors() : List<String> {
         val neighborList = mutableListOf<String>()
         for ( connection in connections ) {

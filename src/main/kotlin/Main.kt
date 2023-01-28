@@ -30,22 +30,28 @@ fun main(args: Array<String>) {
 
     /* <TRADERS> */
 
-    val aTrader = NonPlayerTrader("Yukon Gold!", Traits(visibleInWorld = true))
+    val aTrader = NonPlayerTrader("Blue-Yukon Gold!", Traits(visibleInWorld = true))
 //    aTrader.currentLocation = SceneTree.worldTradeMap.locations["Albuquerque"]!!
     aTrader.currentLocation = SceneTree.worldTradeMap.locations["Lucky Bend"]!!
     SceneTree.worldTradeMap.locations["Lucky Bend"]!!.travelers.add(aTrader)
     EconomyEngine.registerTrader(aTrader)
 
-    val bTrader = NonPlayerTrader("Derr_Mann", Traits(visibleInWorld = true))
+    val bTrader = NonPlayerTrader("Green-Derr_Mann", Traits(visibleInWorld = true))
     bTrader.currentLocation = SceneTree.worldTradeMap.locations["Bluewater"]!!
     SceneTree.worldTradeMap.locations["Bluewater"]!!.travelers.add(bTrader)
     EconomyEngine.registerTrader(bTrader)
 
-    val cTrader = NonPlayerTrader("Anon1", Traits(visibleInWorld = true))
+    val cTrader = NonPlayerTrader("Red-Anon1", Traits(visibleInWorld = true))
     cTrader.currentLocation = SceneTree.worldTradeMap.locations["Scrapyard"]!!
     SceneTree.worldTradeMap.locations["Scrapyard"]!!.travelers.add(cTrader)
     EconomyEngine.registerTrader(cTrader)
 
+    for (i in 0..9) {
+        val rando = NonPlayerTrader("Rando$i", Traits(visibleInWorld = true))
+        rando.currentLocation = SceneTree.worldTradeMap.locations["Lucky Bend"]!!
+        SceneTree.worldTradeMap.locations["Lucky Bend"]!!.travelers.add(rando)
+        EconomyEngine.registerTrader(rando)
+    }
     /* </TRADERS> */
 
 
@@ -83,9 +89,9 @@ fun main(args: Array<String>) {
         val traderSprite:Sprite = TradeViewer.spriteManager.addSprite(trader.name)
         traderSprite.attachToNode(trader.currentLocation.name )
 
-        if (trader.name == "Derr_Mann") {
+        if (trader.name == "Green-Derr_Mann") {
             traderSprite.setAttribute("ui.class", "traderderrmann")
-        } else if (trader.name == "Anon1") {
+        } else if (trader.name == "Red-Anon1") {
             traderSprite.setAttribute("ui.class", "traderanon")
         }else {
             traderSprite.setAttribute("ui.class", "trader")

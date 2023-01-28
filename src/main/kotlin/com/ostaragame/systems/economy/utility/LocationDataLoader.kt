@@ -43,10 +43,13 @@ class LocationDataLoader {
         graph.read(dgsFile!!.path)
         for (node in graph.nodes()) {
             val locationName = node.id
+            val coords = node.getAttribute("xyz") as Array<*>
+            val x:Double = coords[0] as Double
+            val y:Double = coords[1] as Double
              if (locationName !in worldTradeMap.locations) {
                 val location = Location(
                     locationName, WorldTradeMap.getNextLocationId(),
-                    mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf()
+                    mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), x, y
                 )
                 worldTradeMap.locations[locationName] = location
             }
@@ -90,7 +93,7 @@ class LocationDataLoader {
             } else {
                 nearLocation = Location(
                     nearLocationName, WorldTradeMap.getNextLocationId(),
-                    mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf()
+                    mutableListOf(), mutableListOf(), mutableListOf(), mutableListOf(), 0.0, 0.0
                 )
                 worldTradeMap.locations[nearLocationName] = nearLocation
             }
@@ -109,7 +112,7 @@ class LocationDataLoader {
                 val loc2:Location? = WorldTradeMap.locations[connection.location2]
                 loc1.let { it?.connections?.add(connection) }
                 loc2.let { it?.connections?.add(connection) }
-                var edge = graph.addEdge("${loc1?.name}-${loc2?.name}", loc1?.name, loc2?.name)
+                val edge = graph.addEdge("${loc1?.name}-${loc2?.name}", loc1?.name, loc2?.name)
                 edge.setAttribute("layout.weight",connection.distance)
 
             }
