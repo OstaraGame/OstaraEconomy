@@ -112,7 +112,7 @@ fun main(args: Array<String>) {
     val traderOnEdge:MutableMap<NonPlayerTrader,String?> = mutableMapOf()
     val framerate = 60
     while (true) {
-        sleep(16)
+        sleep(4)
         if (frames >=  framerate) {
             EconomyEngine.doTick()
             //MissionEngine.doTick()

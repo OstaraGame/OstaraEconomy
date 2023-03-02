@@ -1,5 +1,20 @@
 LocationName,TradeGoodName,Inventory,InventoryMax,RestockRateBase,RestockRate
-Old Town,Water,200000,500000,100000,100000
-Bluewater,Glass,0,2000,200,200
-Albuquerque,Fabric,20,1000,10,5
-Scrapyard,Parts,2500,1000000,.01,.01
+Old Town,Water,20000000,50000000,10000,10000
+Old Town,Fruit,150,2000,120,100
+Old Town,Fuel,300,5000,200,75
+Old Town,Food,300,5000,50,50
+Bluewater,Water,20000,30000,100,100
+Bluewater,Glass,0,200000,20000,20000
+Bluewater,Fuel,0,5000,500,75
+Bluewater,SS Bottles,0,5000,150,150
+Albuquerque,Fabric,2000,100000,100,60
+Albuquerque,Clothing,200,100000,50,50
+Albuquerque,Rope,150,10000,8,8
+Albuquerque,Shoes,350,10000,60,20
+Albuquerque,Food,300,10000,200,125
+Scrapyard,Parts,250000,100000000,100,5
+Scrapyard,Sewing Needles,100,20,20,20
+Black Rock Canyon Town,Ore,350,100000,100,125
+South Albuquerque Farms,Fiber,10000,100000,250,120
+South Albuquerque Farms,Fruit,500,5000,120,120
+South Albuquerque Farms,Grain,10000,100000,2000,1000

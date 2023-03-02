@@ -4,6 +4,7 @@ import com.ostaragame.systems.economy.WorldTradeMap
 import com.ostaragame.systems.economy.actors.NonPlayerTrader
 
 object EconomyEngine : ServerTick {
+    public const val STORAGE_SIZE: Int = 500
     private val nonPlayerTraders:MutableSet<NonPlayerTrader> = mutableSetOf()
 
     private val tradersLookingForJobs:MutableList<NonPlayerTrader> = mutableListOf()
@@ -99,13 +100,12 @@ object EconomyEngine : ServerTick {
     }
 
     private fun doRestock() {
-        //TODO handle demand increasing unchecked, or overflowing past Float.MAX_VALUE
         for (location in WorldTradeMap.locations.values) {
             for (supply in location.supply) {
-                supply.inventoryCurrent = maxOf( (supply.inventoryCurrent + supply.restockRate), supply.inventoryMax )
+                supply.inventoryCurrent = minOf( (supply.inventoryCurrent + supply.restockRate), supply.inventoryMax )
             }
             for (demand in location.demand) {
-                demand.unitsDemanded = demand.unitsDemanded + demand.demandRate
+                demand.inventory = maxOf(demand.inventory - demand.demandRate, 0)
             }
         }
     }
@@ -158,7 +158,7 @@ object EconomyEngine : ServerTick {
             val location = queue.removeFirst()
             //Do we have demand
             for (demand in location.demand) {
-                if (demand.tradeGood == tradeGood && demand.unitsDemanded > 0) {
+                if (demand.tradeGood == tradeGood && demand.unitsDemanded() > 0) {
                     tradeGoodDemand = demand
                     println(tradeGoodDemand)
                 }
@@ -184,7 +184,7 @@ object EconomyEngine : ServerTick {
         var tradeMission:TradeMission? = null
         if (!stillLooking) {
             result = "Success"
-            tradeMission = TradeMission(tradeGood, tradeGoodSupply!!, tradeGoodDemand!!)
+            tradeMission = TradeMission(tradeGood, tradeGoodSupply!!, tradeGoodDemand!!, tradeGoodDemand.unitsDemanded())
         }
         return Pair(result, tradeMission)
     }

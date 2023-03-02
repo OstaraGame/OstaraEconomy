@@ -10,8 +10,11 @@ class Traits (){
     }
 
     var travelSpeed:Double = 10.0
-    val maxCargoUnits = 100.0f
+    val maxCargoUnits = 500
     var visibleInWorld = false
+
+    //Master Negotiator allows a trader to negotiate a lower purchase price, or a higher selling price
+    val masterNegotiator = false
 
     //Overhauler: Picks up more supplies than the demand calls for
     //Patient: Waits if there is no supply/demand, versus impatient dropping job and searching again

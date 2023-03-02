@@ -13,8 +13,8 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
     private var state:TraderState = TraderState.IDLE
     var currentLocation: Location = WorldTradeMap.traderOffMapHome
     var cargoStored:MutableMap<TradeGood, Cargo> = mutableMapOf()
-    var cargoUnitsFilled = 0.0F
-    var money = 0.0F
+    var cargoUnitsFilled = 0
+    var money = 0
 
     var tradeMission:TradeMission? = null
     var route = mutableListOf<RouteLeg>()
@@ -97,7 +97,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
     }
 
     private fun travelToSupply() {
-        println("Trader $name is traveling towards Supply Pickup")
+        //DEBUG println("Trader $name is traveling towards Supply Pickup")
         //Advance along the route and update position
         val arrived = doTravel()
 
@@ -109,22 +109,32 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
 
 
     private fun arrivedAtSupplyPickup() {
-        println("Trader $name has arrived at Supply Pickup")
+        //DEBUG println("Trader $name has arrived at Supply Pickup")
         state = TraderState.PICKUP_SUPPLIES
     }
 
     private fun pickupSupplies() {
         //TODO The loading of cargo needs to be managed by something else as traders could pull cargo that doesn't exist, or have multithreading issues
         tradeMission?.let {
-            if (it.supply.inventoryCurrent > 0 && availableCargoSpace() > 0 && it.demand.unitsDemanded > 0) {
+            if (it.supply.inventoryCurrent > 0 && availableCargoSpace() > 0 && it.demand.unitsDemanded() > 0) {
+                var price = it.supply.currentPrice
+                //TODO try to negotiate trait otherwise don't pick up for this job
+                if (traits.masterNegotiator) {
+                    price = it.negotiate()
+                }
+                if (price > it.demand.ceilingPrice) {
+                    goIdle()
+                    println("Trader $name is unable to pickup supplies as the price is too high for ${it.tradeGood.name} at ${it.supply.location.name}")
+                }
+
                 //TODO Overhauler trait will treat this differently
-                val amountToLoad = minOf(it.supply.inventoryCurrent, availableCargoSpace(), it.demand.unitsDemanded)
-                println("Trader $name is picking up supplies $amountToLoad units of ${it.tradeGood.name}")
+                val amountToLoad = minOf(it.supply.inventoryCurrent, availableCargoSpace(), it.unitsDemanded)
+                println("Trader $name is picking up supplies from $currentLocation, $amountToLoad units of ${it.tradeGood.name}")
                 //TODO Use the price of the supply, not the cost
-                money = money.minus(amountToLoad*it.supply.tradeGood.cost)
+                money = money.minus(amountToLoad*price)
                 it.supply.inventoryCurrent = it.supply.inventoryCurrent.minus(amountToLoad)
                 cargoUnitsFilled = cargoUnitsFilled.plus(amountToLoad)
-                val cargo = cargoStored[it.tradeGood] ?: Cargo(it.tradeGood, 0.0F)
+                val cargo = cargoStored[it.tradeGood] ?: Cargo(it.tradeGood, 0)
                 cargo.units = cargo.units.plus(amountToLoad)
                 cargoStored[cargo.tradeGood] = cargo
                 state = TraderState.SUPPLIES_LOADED
@@ -143,7 +153,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
 
     private fun suppliesLoaded() {
         //TODO Find route to destination
-        println("Trader $name is finished loading and now planning the route to the demand")
+        //DEBUG println("Trader $name is finished loading and now planning the route to the demand")
         state = TraderState.TRAVELING_TO_DEMAND
     }
 
@@ -158,20 +168,21 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
     }
 
     private fun arrivedAtDemandLocation() {
-        println("Trader $name has arrived at demand location")
+        //DEBUG println("Trader $name has arrived at demand location")
         state = TraderState.DELIVER_GOODS
     }
 
     private fun deliverGoods() {
-        println("Trader $name is delivering goods")
+        //DEBUG println("Trader $name is delivering goods")
         //TODO The loading of cargo needs to be managed by something else as traders could pull cargo that doesn't exist, or have multithreading issues
         tradeMission?.let {
-            if (it.demand.unitsDemanded > 0) {
-                val cargo = cargoStored[it.tradeGood]?: Cargo(it.tradeGood, 0.0F)
-                val amountToOffload = minOf(it.demand.unitsDemanded, cargo.units)
+            if (it.demand.unitsDemanded() > 0) {
+                val cargo = cargoStored[it.tradeGood]?: Cargo(it.tradeGood, 0)
+                val amountToOffload = minOf(it.demand.unitsDemanded(), cargo.units)
+                println("Trader $name is delivering to $currentLocation, $amountToOffload / ${cargo.units} units of ${it.tradeGood.name}")
                 cargoUnitsFilled = cargoUnitsFilled.minus(amountToOffload)
                 cargo.units = cargo.units.minus(amountToOffload)
-                it.demand.unitsDemanded = it.demand.unitsDemanded.minus(amountToOffload)
+                it.demand.inventory = it.demand.inventory.plus(amountToOffload)
                 //TODO Use the price of the demand, not the ceilingPrice
                 money = money.plus(amountToOffload*it.demand.ceilingPrice)
                 if (cargo.units <= 0) {
@@ -211,7 +222,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
                 destinationLocation = route.last().nextStop
                 currentLeg = route.removeFirst()
                 currentLeg?.let{ distanceRemainingToNextLocation = it.connection.distance }
-                println("Trader $name is traveling towards ${currentLeg?.nextStop}, dist remaining: $distanceRemainingToNextLocation")
+                //DEBUG println("Trader $name is traveling towards ${currentLeg?.nextStop}, dist remaining: $distanceRemainingToNextLocation")
                 return false
             } else if (currentLeg == null){
                 goIdle()
@@ -228,7 +239,7 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
         distanceRemainingToNextLocation = distanceRemainingToNextLocation.minus(effectiveSpeed())
         if (distanceRemainingToNextLocation <= 0) {
             currentLeg?.let { currentLocation = it.nextStop }
-            println("Trader $name is at $currentLocation, continuing to travel")
+            //DEBUG println("Trader $name is at $currentLocation, continuing to travel")
             if (currentLeg?.traderActivity == TraderActivity.NONE && route.isNotEmpty()) { //Then keep going....
                 currentLeg = route.removeFirst()
 
@@ -246,11 +257,11 @@ class NonPlayerTrader(val name: String, val traits: Traits) {
                 arrived = true
             }
         } else {
-            println("Trader $name is traveling towards ${currentLeg?.nextStop}, dist remaining: $distanceRemainingToNextLocation ")
+            //DEBUG println("Trader $name is traveling towards ${currentLeg?.nextStop}, dist remaining: $distanceRemainingToNextLocation ")
         }
         return arrived
     }
-    fun availableCargoSpace():Float {
+    fun availableCargoSpace():Int {
         return traits.maxCargoUnits - cargoUnitsFilled
     }
 }

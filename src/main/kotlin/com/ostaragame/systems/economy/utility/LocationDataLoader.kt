@@ -128,8 +128,8 @@ class LocationDataLoader {
             try {
                 TradeLibrary.tradeGoods[key] = TradeGood(key,
                     TradeLibrary.TradeGoodType.valueOf(record.get(TradeGoodHeaders.Type)),
-                    record.get(TradeGoodHeaders.Cost).toFloat(),
-                    record.get(TradeGoodHeaders.Volume).toFloat())
+                    record.get(TradeGoodHeaders.Cost).toInt(),
+                    record.get(TradeGoodHeaders.Volume).toInt())
             } catch (e: IllegalArgumentException) {
                 error("Exception '${e.message}' loading '$key'")
             }
@@ -154,9 +154,10 @@ class LocationDataLoader {
             }
             val tradeGoodDemand = TradeGoodDemand(tradeGood,
                 location,
-                record.get(TradeGoodDemandHeaders.UnitsDemanded).toFloat(),
-                record.get(TradeGoodDemandHeaders.DemandRate).toFloat(),
-                record.get(TradeGoodDemandHeaders.CeilingPrice).toFloat(),
+                record.get(TradeGoodDemandHeaders.DemandRate).toInt(),
+                record.get(TradeGoodDemandHeaders.Inventory).toInt(),
+                record.get(TradeGoodDemandHeaders.StorageClass).toInt(),
+                record.get(TradeGoodDemandHeaders.CeilingPrice).toInt(),
             )
             location.demand.add(tradeGoodDemand)
         }
@@ -180,10 +181,11 @@ class LocationDataLoader {
             }
             val tradeGoodSupply = TradeGoodSupply(tradeGood,
                 location,
-                record.get(TradeGoodSupplyHeaders.Inventory).toFloat(),
-                record.get(TradeGoodSupplyHeaders.InventoryMax).toFloat(),
-                record.get(TradeGoodSupplyHeaders.RestockRateBase).toFloat(),
-                record.get(TradeGoodSupplyHeaders.RestockRate).toFloat(),
+                record.get(TradeGoodSupplyHeaders.Inventory).toInt(),
+                record.get(TradeGoodSupplyHeaders.InventoryMax).toInt(),
+                record.get(TradeGoodSupplyHeaders.RestockRateBase).toInt(),
+                record.get(TradeGoodSupplyHeaders.RestockRate).toInt(),
+                tradeGood.cost
             )
             location.supply.add(tradeGoodSupply)
         }
@@ -198,7 +200,7 @@ class LocationDataLoader {
     }
 
     enum class TradeGoodDemandHeaders:CSVHeader {
-        LocationName,TradeGoodName,UnitsDemanded,DemandRate,CeilingPrice
+        LocationName,TradeGoodName,DemandRate,Inventory,StorageClass,CeilingPrice
     }
 
     enum class TradeGoodSupplyHeaders:CSVHeader {
@@ -211,47 +213,47 @@ class LocationDataLoader {
 
         var nearLocation = WorldTradeMap.locations["Old Town"]!!
         var distantLocation = WorldTradeMap.locations["Scrapyard"]!!
-        var connection = Connection(nearLocation.name, distantLocation.name,20.0f,Infrastructure.ROUGH, Terrain.HILLS, Weather.CLEAR, mutableListOf())
+        var connection = Connection(nearLocation.name, distantLocation.name,20.0,Infrastructure.ROUGH, Terrain.HILLS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Old Town"]!!
         distantLocation = WorldTradeMap.locations["Lucky Bend"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,100.0f,Infrastructure.IMPROVED, Terrain.HILLS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,100.0,Infrastructure.IMPROVED, Terrain.HILLS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Old Town"]!!
         distantLocation = WorldTradeMap.locations["Badlands"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,120.0f,Infrastructure.ROUGH, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,120.0,Infrastructure.ROUGH, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Lucky Bend"]!!
         distantLocation = WorldTradeMap.locations["Bluewater"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,120.0f,Infrastructure.IMPROVED, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,120.0,Infrastructure.IMPROVED, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Lucky Bend"]!!
         distantLocation = WorldTradeMap.locations["Badlands"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,200.0f,Infrastructure.ROUGH, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,200.0,Infrastructure.ROUGH, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Badlands"]!!
         distantLocation = WorldTradeMap.locations["Albuquerque"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,100.0f,Infrastructure.TRAILS, Terrain.DESERT, Weather.HOT, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,100.0,Infrastructure.TRAILS, Terrain.DESERT, Weather.HOT, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Badlands"]!!
         distantLocation = WorldTradeMap.locations["Black Rock Canyon Town"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,50.0f,Infrastructure.IMPROVED, Terrain.HILLS, Weather.HOT, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,50.0,Infrastructure.IMPROVED, Terrain.HILLS, Weather.HOT, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Black Rock Canyon Town"]!!
         distantLocation = WorldTradeMap.locations["South Albuquerque Farms"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,75.0f,Infrastructure.IMPROVED, Terrain.RIVERS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,75.0,Infrastructure.IMPROVED, Terrain.RIVERS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         nearLocation = WorldTradeMap.locations["Albuquerque"]!!
         distantLocation = WorldTradeMap.locations["South Albuquerque Farms"]!!
-        connection = Connection(nearLocation.name, distantLocation.name,15.0f,Infrastructure.EFFICIENT, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
+        connection = Connection(nearLocation.name, distantLocation.name,15.0,Infrastructure.EFFICIENT, Terrain.PLAINS, Weather.CLEAR, mutableListOf())
         connections.add(connection)
 
         val jsonOutput = jsonformat.encodeToString(connections)
